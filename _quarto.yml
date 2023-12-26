@@ -2,16 +2,30 @@ project:
   type: website
 
 website:
-  title: "Personal-Website"
+  title: "Simon Chiu"
   navbar:
+    background: "#282D33"
     left:
-      - href: index.qmd
-        text: Home
+      - text: "Data Analytics Projects"
+        menu:
+          - text: "Project 1"
+            href: "Project 1.html"
+      - text: "Quarto Turtorial Articles"
+        menu:
+          - text: "Article 1"
+            href: "Article 1.html"
+    right:
+      - icon: github
+        href: https://github.com/simonchiu902/Personal-Website
+      - icon: linkedin
+        href: https://www.linkedin.com/in/shih-cheng-chiu-simon-183906163/
+      - text: "Home"
+        href: index.qmd
       - about.qmd
 
 format:
   html:
-    theme: cosmo
+    theme: journal
     css: styles.css
     toc: true
 
