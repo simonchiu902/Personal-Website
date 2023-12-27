@@ -1,0 +1,195 @@
+---
+title: "How to build a Quarto website"
+author: "Simon Chiu"
+date: last-modified
+editor: visual
+---
+
+# Introduction
+
+In this article, I'll demonstrate how to utilize RStudio and Netlify to construct your Quarto website. There are several advantages to a Quarto website. Firstly, it supports multiple popular languages, including Python, R, and LaTeX. Secondly, publishing on a Netlify domain is free of charge.
+
+# Step1: Install Git
+
+First, download [Git](https://git-scm.com/downloads).
+
+If you already have Git, you can skip this step.
+
+# Step2: Create a GitHub Account
+
+Create [GitHub account](https://github.com/).
+
+There are two things to note:
+
+1.  Use your permanent email to create the account; don't use your work or school account. This is to ensure you can always access your account and work.
+
+2.  Use a simple GitHub username that doesn't include spaces in the name.
+
+If you already have a GitHub account, you can skip this step.
+
+# Step3: Install RStudio
+
+Install [Rstudio](https://posit.co/download/rstudio-desktop/) (now it has a new name Posit).
+
+If you already have Rstudio, you can skip this step.
+
+# Step4: Setup RStudio
+
+1.  Open your RStudio. Click "File" and select "New Project" within Rstudio.
+
+    ![](image/Picture1.png)
+
+2.  Select "New Directory".
+
+    ![](image/Picture2.png)
+
+3.  Select "Quarto Website". (If there is no such option, you may need to update your Rstudio version. )\
+    ![](image/Picture3.png)
+
+4.  For "Directory name", don't include any space in the name.\
+    ![](image/Picture4.png)
+
+    For "Create projects as a subdirectory of", click on "Browse" to select the folder with the same name as your GitHub username. If you haven't created a folder with this name yet, please create one first. For instance, my GitHub username is "simonchiu902", so I created a folder named "simonchiu902" and then used "Browse" to select this folder.\
+    ![](image/Picture5.png)\
+    Make sure other settings are the same as the screenshot and click on "Create Project".
+
+5.  After the above steps, Rstudio will direct you to your new project.\
+    ![](image/Picture6.png)
+
+    If you check your directory, you'll find the following files have been created.\
+    ![](image/Picture7.png)
+
+6.  Now, go back to your Rstudio and click "Build" and "Render Website".\
+    ![](image/Picture8.png)
+
+    A window will pop up and this is the draft of your website where we will further make changes.\
+    ![](image/Picture9.png)
+
+# Step5: Set up Git
+
+We are going to use Git within R for version control.
+
+1.  Type in "git config --global user.name" in the "Terminal" to check if you're linking to the correct Github name.\
+    ![](image/Picture10.png)
+
+    If your output is empty or wrong, type "git config \--global user.name"your_username"" in your terminal. (replace your_username with your correct username)\
+    ![](image/Picture11.png)
+
+2.  Type in "git config \--global user.email" to check if the email is correct.\
+    ![](image/Picture12.png)
+
+    If not, then type "git config \--global user.email"your_email"" in your terminal. (replace your_email with your correct email)\
+    ![](image/Picture13.png)
+
+3.  Click "Tools" and "Install Packages" to install "devtools" and "usethis"\
+    ![](image/Picture14.png)\
+
+    ![](image/Picture15.png)\
+    \
+    ![](image/Picture16.png)
+
+4.  Type "usethis::use_git()" in your "Console". (note that this time we use "Console", not "Terminal" in previous steps)\
+    ![](image/Picture17.png)\
+    It will ask you "Is it ok to commit them?". We don't want to commit now so select "No" by typing the corresponding number.\
+    ![](image/Picture18.png)\
+    Then it will ask you "A restart of RStudio is required to activate the Git pane. Restart now?". Select "Yup" by entering the corresponding number.\
+    ![](image/Picture19.png)
+
+5.  After restart, you can see a "Git" option is added on the upper right panel.\
+    ![](image/Picture20.png)
+
+6.  Check all items in the Git panel.\
+
+    ::: callout-tip
+    click on first item, press Shift and click the last item to select all items
+    :::
+
+    ![](image/Picture21.png)\
+    \
+    ![](image/Picture22.png)
+
+    After selecting all items, click "Commit".\
+    ![](image/Picture23.png)\
+    The window will pop up. Fill in your desired comment in the "Commit message" and then click "Commit". ![](image/Picture24.png)\
+    After "Commit", go back to your Rstudio. There should be no more items under "Git".\
+    ![](image/Picture25.png)\
+
+# Step6: Build Link to GitHub
+
+1.  Type "usethis::use_github()" in the Console. ![](image/Picture26.png)
+
+2.  If you encounter the following error, this may be because you lack a valid Github token. To solve this, please follow the following steps.\
+    ![](image/Picture27.png)
+
+3.  Type "usethis::create_github_token()" and this will direct you to a Github page.\
+    ![](image/Picture28.png)
+
+    Fill in your "Note" and set up "Expiration" days.
+
+    ![](image/Picture29.png)
+
+    Scroll to the bottom of the page and click "Generate token". This will direct you to a new page with a new generated token. Do not close this new page with your token, we'll use it later.
+
+    ![](image/Picture30.png)
+
+4.  Back to your Rstudio, type "gitcreds::gitcreds_set()".
+
+    ![](image/Picture31.png)
+
+    In my case, I previously used some older and outdated credentials (tokens), triggering this message. I'll proceed by choosing "Replace these credentials" and typing the associated number. If you haven't entered any credentials previously, you might simply be prompted to input your new credentials directly into the console, allowing you to paste your newly generated credential.
+
+    ![](image/Picture32.png)
+
+    After I enter 2, it prompts me to enter my newly generated token. You can go back to the Github page showing the new token, copy and paste it in the console.
+
+    ![](image/Picture33.png)
+
+5.  After successfully render your token, type in "usethis::use_github()" again.
+
+    ![](image/Picture34.png)
+
+    This time it should successfully direct you to Github and create a new repository for you.
+
+    ![](image/Picture35.png)
+
+# Step7: Use Netlify to publish your website
+
+1.  Sign up [Netlify](https://www.netlify.com/) with your Github account.
+
+    ![](image/Picture36.png)
+
+2.  After signing in, it will direct you to this page.
+
+    ![](image/Picture37.png)
+
+3.  Find the "Add new site" button and click on "Import an existing project".
+
+    ![](image/Picture38.png)
+
+4.  Click "Deploy with GitHub" and link Netify with your Github account.
+
+    ![](image/Picture39.png)
+
+5.  Select your newly created repository.
+
+    ![](image/Picture40.png)
+
+6.  Keep all the settings unchanged, but specifically input "\_site" into the "Publish directory" field. Click on "Deploy" to finish the setting.
+
+    ![](image/Picture41.png)
+
+7.  After you deploy the website, it will direct you to this page. The link is a random name and we can change it by clicking "Site configuration".
+
+    ![](image/Picture42.png)
+
+    Find "Change site name" and change the url to your desired name.
+
+    ![](image/Picture43.png)
+
+    ![](image/Picture44.png)
+
+8.  You may need to wait a few minutes for Netify to process and then you can use the new URL to access your website.
+
+# Credit
+
+I would like to acknowledge [Dr. KAM Tin Seong](https://github.com/tskam) for his guidance on utilizing Quarto, imparted during his Visual Analytics course at SMU. This tutorial is compiled based on his lectures, and I believe it's valuable to share with individuals keen on exploring Quarto.

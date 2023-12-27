@@ -4,5 +4,11 @@
   },
   "index.qmd": {
     "index.html": "aaf8b56c"
+  },
+  "index.ipynb": {
+    "index.html": "697a1a4b"
+  },
+  "Quarto_tutorial_articles/Quarto_Article1/Quarto_Article1.qmd": {
+    "Quarto_Article1.html": "23abe6fe"
   }
 }

@@ -1,11 +1,7 @@
 ---
-title: "Personal-Website"
+title: "Welcome to my Website"
 ---
 
-This is a Quarto website.
+On this website, I share various data analytics projects and tutorial articles.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+I hope these resources provide insight into my data analytics journey and offer valuable information for you.

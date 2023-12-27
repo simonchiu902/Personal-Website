@@ -10,10 +10,10 @@ website:
         menu:
           - text: "Project 1"
             href: "Project 1.html"
-      - text: "Quarto Turtorial Articles"
+      - text: "Quarto Tutorial Articles"
         menu:
-          - text: "Article 1"
-            href: "Article 1.html"
+          - text: "How to build a Quarto website"
+            href: "Quarto_tutorial_articles/Quarto_Article1/Quarto_Article1.html"
     right:
       - icon: github
         href: https://github.com/simonchiu902/Personal-Website
@@ -21,7 +21,6 @@ website:
         href: https://www.linkedin.com/in/shih-cheng-chiu-simon-183906163/
       - text: "Home"
         href: index.qmd
-      - about.qmd
 
 format:
   html:
