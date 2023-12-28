@@ -14,6 +14,8 @@ website:
         menu:
           - text: "How to build a Quarto website"
             href: "Quarto_tutorial_articles/Quarto_Article1/Quarto_Article1.html"
+          - text: "Custom Quarto Website"
+            href: "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html"
     right:
       - icon: github
         href: https://github.com/simonchiu902/Personal-Website

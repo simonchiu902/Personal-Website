@@ -9,9 +9,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Welcome to my Website",
+    "title": "Simon Chiu",
     "section": "",
-    "text": "I hope these resources provide insight into my data analytics journey and offer valuable information for you."
+    "text": "Education\n\nSingapore Management University, Master of IT in Business (Data Analytics Track)\nNational Taiwan University, Bachelor of International Business\n\n\n\nExperience\n\nIHH Healthcare, Business Data Analyst Intern:\n\n\nConstructed Power BI ETL pipeline and dashboards\nDesigned Power Apps applications\nAnalyzed clinical data\n\n\nShopee, Digital Advertising Analyst Intern:\n\n\nPerformed online advertising on Shopee platform\nMentored over 100 clients in online advertising\n\n\nClarence Language Network, Project Manager Intern:\n\n\nInitiated SEO projects\nAnalyzed GA data\nManaged company website"
   },
   {
     "objectID": "Quarto_tutorial_articles/Quarto_Article1/Quarto_Article1.html",
@@ -19,5 +19,68 @@
     "title": "How to build a Quarto website",
     "section": "",
     "text": "Step1: Install Git\nFirst, download Git.\nIf you already have Git, you can skip this step.\n\n\nStep2: Create a GitHub Account\nCreate GitHub account.\nThere are two things to note:\n\nUse your permanent email to create the account; don’t use your work or school account. This is to ensure you can always access your account and work.\nUse a simple GitHub username that doesn’t include spaces in the name.\n\nIf you already have a GitHub account, you can skip this step.\n\n\nStep3: Install RStudio\nInstall Rstudio (now it has a new name Posit).\nIf you already have Rstudio, you can skip this step.\n\n\nStep4: Setup RStudio\n\nOpen your RStudio. Click “File” and select “New Project” within Rstudio.\n\nSelect “New Directory”.\n\nSelect “Quarto Website”. (If there is no such option, you may need to update your Rstudio version. )\n\nFor “Directory name”, don’t include any space in the name.\n\nFor “Create projects as a subdirectory of”, click on “Browse” to select the folder with the same name as your GitHub username. If you haven’t created a folder with this name yet, please create one first. For instance, my GitHub username is “simonchiu902”, so I created a folder named “simonchiu902” and then used “Browse” to select this folder.\n\nMake sure other settings are the same as the screenshot and click on “Create Project”.\nAfter the above steps, Rstudio will direct you to your new project.\n\nIf you check your directory, you’ll find the following files have been created.\n\nNow, go back to your Rstudio and click “Build” and “Render Website”.\n\nA window will pop up and this is the draft of your website where we will further make changes.\n\n\n\n\nStep5: Set up Git\nWe are going to use Git within R for version control.\n\nType in “git config –global user.name” in the “Terminal” to check if you’re linking to the correct Github name.\n\nIf your output is empty or wrong, type “git config --global user.name”your_username”” in your terminal. (replace your_username with your correct username)\n\nType in “git config --global user.email” to check if the email is correct.\n\nIf not, then type “git config --global user.email”your_email”” in your terminal. (replace your_email with your correct email)\n\nClick “Tools” and “Install Packages” to install “devtools” and “usethis”\n\n\n\n\n\nType “usethis::use_git()” in your “Console”. (note that this time we use “Console”, not “Terminal” in previous steps)\n\nIt will ask you “Is it ok to commit them?”. We don’t want to commit now so select “No” by typing the corresponding number.\n\nThen it will ask you “A restart of RStudio is required to activate the Git pane. Restart now?”. Select “Yup” by entering the corresponding number.\n\nAfter restart, you can see a “Git” option is added on the upper right panel.\n\nCheck all items in the Git panel.\n\n\n\n\n\n\n\nTip\n\n\n\nclick on first item, press Shift and click the last item to select all items\n\n\n\n\n\nAfter selecting all items, click “Commit”.\n\nThe window will pop up. Fill in your desired comment in the “Commit message” and then click “Commit”. \nAfter “Commit”, go back to your Rstudio. There should be no more items under “Git”.\n\n\n\n\n\nStep6: Build Link to GitHub\n\nType “usethis::use_github()” in the Console. \nIf you encounter the following error, this may be because you lack a valid Github token. To solve this, please follow the following steps.\n\nType “usethis::create_github_token()” and this will direct you to a Github page.\n\nFill in your “Note” and set up “Expiration” days.\n\nScroll to the bottom of the page and click “Generate token”. This will direct you to a new page with a new generated token. Do not close this new page with your token, we’ll use it later.\n\nBack to your Rstudio, type “gitcreds::gitcreds_set()”.\n\nIn my case, I previously used some older and outdated credentials (tokens), triggering this message. I’ll proceed by choosing “Replace these credentials” and typing the associated number. If you haven’t entered any credentials previously, you might simply be prompted to input your new credentials directly into the console, allowing you to paste your newly generated credential.\n\nAfter I enter 2, it prompts me to enter my newly generated token. You can go back to the Github page showing the new token, copy and paste it in the console.\n\nAfter successfully render your token, type in “usethis::use_github()” again.\n\nThis time it should successfully direct you to Github and create a new repository for you.\n\n\n\n\nStep7: Use Netlify to publish your website\n\nSign up Netlify with your Github account.\n\nAfter signing in, it will direct you to this page.\n\nFind the “Add new site” button and click on “Import an existing project”.\n\nClick “Deploy with GitHub” and link Netify with your Github account.\n\nSelect your newly created repository.\n\nKeep all the settings unchanged, but specifically input “_site” into the “Publish directory” field. Click on “Deploy” to finish the setting.\n\nAfter you deploy the website, it will direct you to this page. The link is a random name and we can change it by clicking “Site configuration”.\n\nFind “Change site name” and change the url to your desired name.\n\n\nYou may need to wait a few minutes for Netify to process and then you can use the new URL to access your website.\n\n\n\nCredit\nI would like to acknowledge Dr. KAM Tin Seong for his guidance on utilizing Quarto, imparted during his Visual Analytics course at SMU. This tutorial is compiled based on his lectures, and I believe it’s valuable to share with individuals keen on exploring Quarto."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html",
+    "title": "Custom Quarto Website",
+    "section": "",
+    "text": "In this article, I will demonstrate how to customize your Quarto website, which was created following the tutorial in the initial article. If you haven’t read the first article, please access it through this link."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#title",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#title",
+    "title": "Custom Quarto Website",
+    "section": "3-1 Title",
+    "text": "3-1 Title\nThe following two pictures illustrate how the code chunk is linked to a specific title section of the website.\n\n\nLet’s modify the code to “Simon Chiu Personal Website”.\n\nTo observe how this code alteration impacts the website, click on “Preview Website” within the “Build” section. Note that this change hasn’t been pushed to Github, it’s just a preview. We’ll cover how to save the change permanently at the end of this article.\n\nAfter clicking the “Preview Website” button, your updated preview website will pop up. The title of the website correspondingly reflects this change."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#navigation-bar",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#navigation-bar",
+    "title": "Custom Quarto Website",
+    "section": "3-2 Navigation Bar",
+    "text": "3-2 Navigation Bar\n\n\nWe have the option to partition the navigation bar into two sections: left and right. Initially, we’ll concentrate on the left part. The first step involves establishing two primary labels: “Data Analytics Project” and “Quarto Tutorial Articles.” Beneath each primary label, we’ll create a corresponding sub-label (“Project 1” and “Article 1”). It’s important to note that the “href” attribute is utilized to link to specific files, necessitating the creation of Project 1.html and Article 1.html files. Detailed guidance on file creation will be provided in subsequent tutorial articles. Presently, our focus is solely on outlining the navigation bar structure.\n\n\nAs for the right part, we include two qmd files: index.qmd and about.qmd. Note that if we don’t include text:\"Home\" then the name of index.qmd shown on the website will be default to index."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#theme",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#theme",
+    "title": "Custom Quarto Website",
+    "section": "3-3 Theme",
+    "text": "3-3 Theme\n\nThere are multiple built-in themes you can choose from Quarto - HTML Theming. \nFor example, if we change “cosmo” to “journal”, the website will look like this.\n\nIf you don’t like the theme’s navbar color, you can change the color by adding “background”."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#icon",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#icon",
+    "title": "Custom Quarto Website",
+    "section": "3-4 Icon",
+    "text": "3-4 Icon\nIt’s common to include icons that link to your other profiles. For instance, you can enhance your navbar by incorporating GitHub and LinkedIn icons. Achieve this by inserting the following four lines of code into the right section of the navbar."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#image",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#image",
+    "title": "Custom Quarto Website",
+    "section": "4-1 Image",
+    "text": "4-1 Image\nFirst, we have mentioned Title in 3-1, so let’s just start from image.\nTo insert a image, the first step is to create an “images” folder and place all the images you intend to use within this folder for better organization.\nNote that the directory of this “images” folder should match the location of the index.qmd file for the images to be properly referenced.\n\nThen put your picture into this “images” folder.\n\nTo reference this picture, we use the relative path: \"images/icon.png\" By doing so, the website can show the picture successfully."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#about-template",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#about-template",
+    "title": "Custom Quarto Website",
+    "section": "4-2 about: template",
+    "text": "4-2 about: template\nThere are various kinds of templates can choose via Quarto official website.\nEven though these template were designed for about.qmd, I find that it’s also applicable to the index.qmd.\nIn my case, I choose trestles, which will make the outfit of index.qmd look like this:"
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#format-html-fontsize",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#format-html-fontsize",
+    "title": "Custom Quarto Website",
+    "section": "4-3 format: html: fontsize",
+    "text": "4-3 format: html: fontsize\nIf you observe the RStudio user interface, there isn’t an option to directly adjust font sizes within the text editor. You can only change the text format from normal to various header styles.\n\nWhat if the font size of the ‘Normal’ style is still too large?\nThat’s why we use format: html: fontsize to adjust the fontsize of “Normal”."
+  },
+  {
+    "objectID": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#content",
+    "href": "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html#content",
+    "title": "Custom Quarto Website",
+    "section": "4-4 Content",
+    "text": "4-4 Content\nWe’ve completed the explanation of the top section of index.qmd. Let’s now proceed to discuss the main content.\n\nThere are two ways to edit your main content. First is using the Visual Editor. This provides you a more user-friendly UI interface.\n\nAlternatively, if you are familiar with markdown of Jupyter Notebook, you can choose the Source Editor.\nYou can find some common markdown options via this link."
   }
 ]

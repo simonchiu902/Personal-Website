@@ -1,7 +1,40 @@
 ---
-title: "Welcome to my Website"
+title: "Simon Chiu"
+image: "images/icon.png"
+about: 
+  template: trestles
+format: 
+  html:
+    fontsize: 12pt
 ---
+
+### Welcome to my website
 
 On this website, I share various data analytics projects and tutorial articles.
 
 I hope these resources provide insight into my data analytics journey and offer valuable information for you.
+
+### Education
+
+-   Singapore Management University, Master of IT in Business (Data Analytics Track)
+
+-   National Taiwan University, Bachelor of International Business
+
+### Experience
+
+1.  IHH Healthcare, Business Data Analyst Intern:
+
+-   Constructed Power BI ETL pipeline and dashboards
+-   Designed Power Apps applications
+-   Analyzed clinical data
+
+2.  Shopee, Digital Advertising Analyst Intern:
+
+-   Performed online advertising on Shopee platform
+-   Mentored over 100 clients in online advertising
+
+3.  Clarence Language Network, Project Manager Intern:
+
+-   Initiated SEO projects
+-   Analyzed GA data
+-   Managed company website

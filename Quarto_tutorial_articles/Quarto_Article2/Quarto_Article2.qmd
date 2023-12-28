@@ -1,0 +1,191 @@
+---
+title: "Custom Quarto Website"
+author: "Simon Chiu"
+date: last-modified
+editor: visual
+---
+
+# 1. Introduction
+
+In this article, I will demonstrate how to customize your Quarto website, which was created following the tutorial in the initial article. If you haven't read the first article, please access it through this [link](https://simonchiu-personal-website.netlify.app/quarto_tutorial_articles/quarto_article1/quarto_article1).
+
+# 2. General Understanding
+
+Prior to initiating our tailored Quarto website, it's essential to establish a foundational comprehension of the interplay between the backend (RStudio) and the frontend (Netlify).
+
+Within your RStudio environment, you should have a file named index.qmd.
+
+![](image/Picture1.png)
+
+If you compare the content of index.qmd and the screenshot of homepage below, it's not hard to find that they are the same. In other words, altering the content within the index.qmd file allows us to adjust the appearance of the homepage.
+
+![](image/Picture2.png)
+
+Another file you should have is quarto.yml, which primarily determines the title, navigation bar, and theme of the website. For instance, the code highlighted within the red box determines the navigation bar of the website.
+
+![](image/Picture3.png)
+
+![](image/Picture4.png)
+
+# 3. quarto.yml
+
+Now, let's begin by modifying some crucial elements within the quarto.yml file.
+
+## 3-1 Title
+
+The following two pictures illustrate how the code chunk is linked to a specific title section of the website.
+
+![](image/Picture5.png)
+
+![](image/Picture6.png)
+
+Let's modify the code to "Simon Chiu Personal Website".
+
+![](image/Picture7.png)
+
+To observe how this code alteration impacts the website, click on "Preview Website" within the "Build" section. Note that this change hasn't been pushed to Github, it's just a preview. We'll cover how to save the change permanently at the end of this article.
+
+![](image/Picture8.png)
+
+After clicking the "Preview Website" button, your updated preview website will pop up. The title of the website correspondingly reflects this change.
+
+![](image/Picture9.png)
+
+## 3-2 Navigation Bar
+
+![](image/Picture10.png)
+
+![](image/Picture11.png)
+
+We have the option to partition the navigation bar into two sections: left and right. Initially, we'll concentrate on the left part. The first step involves establishing two primary labels: "Data Analytics Project" and "Quarto Tutorial Articles." Beneath each primary label, we'll create a corresponding sub-label ("Project 1" and "Article 1"). It's important to note that the "href" attribute is utilized to link to specific files, necessitating the creation of Project 1.html and Article 1.html files. Detailed guidance on file creation will be provided in subsequent tutorial articles. Presently, our focus is solely on outlining the navigation bar structure.
+
+![](image/Picture12.png)
+
+![](image/Picture13.png)
+
+As for the right part, we include two qmd files: index.qmd and about.qmd. Note that if we don't include `text:"Home"` then the name of index.qmd shown on the website will be default to *index.*
+
+![](image/Picture14.png)
+
+![](image/Picture15.png)
+
+## 3-3 Theme
+
+![](image/Picture16.png)
+
+There are multiple built-in themes you can choose from [Quarto - HTML Theming](https://quarto.org/docs/output-formats/html-themes.html). 
+
+For example, if we change "cosmo" to "journal", the website will look like this.
+
+![](image/Picture17.png)
+
+If you don't like the theme's navbar color, you can change the color by adding "background".
+
+![](image/Picture18.png)
+
+![](image/Picture19.png)
+
+## 3-4 Icon
+
+It's common to include icons that link to your other profiles. For instance, you can enhance your navbar by incorporating GitHub and LinkedIn icons. Achieve this by inserting the following four lines of code into the right section of the navbar.
+
+![](image/Picture20.png)
+
+![](image/Picture21.png)
+
+# 4. index.qmd
+
+When a viewer first enters your website through your website link: https://xxx.netlify.app/ , they will see this page.
+
+![](image/Picture22.png)
+
+In fact, the content on this page is from your index.qmd file. If you compare the picture above and the one below, you'll notice they have the same content.
+
+![](image/Picture23.png)
+
+Now, let's modify the index.qmd file and observe how it reflects the changes on the website.
+
+This [Quarto official documentation](https://quarto.org/docs/authoring/markdown-basics.html) provides various ways to format your text.
+
+Let's start by the top section of the index.qmd file. This section determines some important property of this file.
+
+I changed the original content to the new ones shown in the picture below. I'll go step by step to explain what's the meaning of each elements.
+
+![](image/Picture24.png)
+
+## 4-1 Image
+
+First, we have mentioned `Title` in **3-1**, so let's just start from `image.`
+
+To insert a image, the first step is to create an "images" folder and place all the images you intend to use within this folder for better organization.
+
+Note that the directory of this "images" folder should match the location of the index.qmd file for the images to be properly referenced.
+
+![](image/Picture25.png)
+
+Then put your picture into this "images" folder.
+
+![](image/Picture26.png)
+
+To reference this picture, we use the relative path: `"images/icon.png"` By doing so, the website can show the picture successfully.
+
+![](image/Picture27.png)
+
+## 4-2 about: template
+
+There are various kinds of templates can choose via [Quarto official website](https://quarto.org/docs/websites/website-about.html).
+
+Even though these template were designed for about.qmd, I find that it's also applicable to the index.qmd.
+
+In my case, I choose `trestles`, which will make the outfit of index.qmd look like this:
+
+![](image/Picture28.png)
+
+![](image/Picture29.png)
+
+## 4-3 format: html: fontsize
+
+If you observe the RStudio user interface, there isn't an option to directly adjust font sizes within the text editor. You can only change the text format from normal to various header styles.
+
+![](image/Picture30.png)
+
+What if the font size of the 'Normal' style is still too large?
+
+That's why we use `format: html: fontsize` to adjust the fontsize of "Normal".
+
+## 4-4 Content
+
+We've completed the explanation of the top section of index.qmd. Let's now proceed to discuss the main content.
+
+![](image/Picture31.png)
+
+There are two ways to edit your main content. First is using the **Visual Editor.** This provides you a more user-friendly UI interface.
+
+![](image/Picture32.png)
+
+Alternatively, if you are familiar with markdown of Jupyter Notebook, you can choose the **Source Editor.**
+
+You can find some common markdown options via this [link](https://quarto.org/docs/authoring/markdown-basics.html).
+
+![](image/Picture33.png)
+
+# 5. Save changes to your website
+
+Recall that in 3-1 we said that the changes now are just "Website Preview". To save the changes permanently, we need to do the following steps:
+
+1.  Click "Render Website". This triggers Quarto to generate necessary files to build the updated website.\
+    ![](image/Picture34.png)
+
+2.  Select all changes under the "Git" tab. Then click "Commit".\
+    ![](image/Picture35.png)
+
+3.  Type in necessary "Commit message" and click "Commit".\
+    ![](image/Picture36.png)
+
+4.  Click "Push" to push these changes to Github.\
+    ![](image/Picture37.png)
+
+5.  Now refresh your Netlify website again, you should be able to see the updated version and your changes are also pushed to Github.\
+    ![](image/Picture38.png)
+
+    ![](image/Picture39.png)

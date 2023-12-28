@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Simon Chiu - Welcome to my Website</title>
+<title>Simon Chiu</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -33,7 +33,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
@@ -63,7 +62,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -95,6 +94,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="dropdown-item" href="./Quarto_tutorial_articles/Quarto_Article1/Quarto_Article1.html">
  <span class="dropdown-text">How to build a Quarto website</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="./Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html">
+ <span class="dropdown-text">Custom Quarto Website</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -122,34 +125,64 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
+<div class="quarto-about-trestles">
+  <div class="about-entity">
+    <img src="images/icon.png" class="about-image
+  rounded " style="width: 20em;">
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Welcome to my Website</h1>
+<h1 class="title">Simon Chiu</h1>
 </div>
-
-
-
 <div class="quarto-title-meta">
-
-    
-    
   </div>
-  
-
 </header>
-
+  </div>
+  <div class="about-contents"><main class="content" id="quarto-document-content">
+<section id="welcome-to-my-website" class="level3">
+<h3 data-anchor-id="welcome-to-my-website">Welcome to my website</h3>
 <p>On this website, I share various data analytics projects and tutorial articles.</p>
 <p>I hope these resources provide insight into my data analytics journey and offer valuable information for you.</p>
+</section>
+<section id="education" class="level3">
+<h3 data-anchor-id="education">Education</h3>
+<ul>
+<li><p>Singapore Management University, Master of IT in Business (Data Analytics Track)</p></li>
+<li><p>National Taiwan University, Bachelor of International Business</p></li>
+</ul>
+</section>
+<section id="experience" class="level3">
+<h3 data-anchor-id="experience">Experience</h3>
+<ol type="1">
+<li>IHH Healthcare, Business Data Analyst Intern:</li>
+</ol>
+<ul>
+<li>Constructed Power BI ETL pipeline and dashboards</li>
+<li>Designed Power Apps applications</li>
+<li>Analyzed clinical data</li>
+</ul>
+<ol start="2" type="1">
+<li>Shopee, Digital Advertising Analyst Intern:</li>
+</ol>
+<ul>
+<li>Performed online advertising on Shopee platform</li>
+<li>Mentored over 100 clients in online advertising</li>
+</ul>
+<ol start="3" type="1">
+<li>Clarence Language Network, Project Manager Intern:</li>
+</ol>
+<ul>
+<li>Initiated SEO projects</li>
+<li>Analyzed GA data</li>
+<li>Managed company website</li>
+</ul>
 
 
-
-</main> <!-- /main -->
+</section>
+</main></div>
+</div>
+ <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -170,13 +203,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
   const clipboard = new window.ClipboardJS('.code-copy-button', {
     target: function(trigger) {
       return trigger.previousElementSibling;
