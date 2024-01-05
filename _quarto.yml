@@ -8,8 +8,8 @@ website:
     left:
       - text: "Data Analytics Projects"
         menu:
-          - text: "Project 1"
-            href: "Project 1.html"
+          - text: "Population Visual Analysis"
+            href: "Data_Analytics_Projects/Population Visual Analysis/Population_Visual_Analysis.html"
       - text: "Quarto Tutorial Articles"
         menu:
           - text: "How to build a Quarto website"

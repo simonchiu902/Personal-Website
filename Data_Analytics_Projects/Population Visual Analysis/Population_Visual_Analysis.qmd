@@ -1,0 +1,1254 @@
+---
+title: "Demographic Visual Analysis"
+author: "Simon Chiu"
+date: last-modified
+execute: 
+  warning: false
+---
+
+# 1. Setting the Scene
+
+City of Engagement, with a total population of 50,000, is a small city located at Country of Nowhere. The city serves as a service centre of an agriculture region surrounding the city. The main agriculture of the region is fruit farms and vineyards. The local council of the city is in the process of preparing the Local Plan 2023. A sample survey of 1000 representative residents had been conducted to collect data related to their household demographic and spending patterns, among other things. The city aims to use the data to assist with their major community revitalization efforts, including how to allocate a very large city renewal grant they have recently received.
+
+# 2. The Task
+
+The goal is to build effective visualizations to help city managers and planners to explore the complex data, to assist with their major community revitalization efforts, including how to allocate a very large city renewal grant they have recently received.
+
+# 3. The Data
+
+For the purpose of this study, two data sets will be analysed. They are:
+
+-   **Participants.csv**: Contains information about the residents of City of Engagement that have agreed to participate in this study.
+-   **FinancialJournal.csv**: Contains information about financial transactions of residents in the city.
+
+# 4 Import R Packages and Data
+
+First, the necessary packages are installed and loaded onto RStudio.
+
+```{r}
+pacman::p_load(ggplot2, tidyverse, ggrepel, patchwork, 
+               ggthemes,hrbrthemes,ggiraph, plotly, 
+               patchwork, DT, gifski, gapminder,
+               gganimate, crosstalk, ggstatsplot, dplyr, lubridate, ggnewscale, broom, knitr, ggridges, viridis, ggdist, ggridges, colorspace)
+```
+
+The *Participants.csv* and *FinancialJournal.csv* data is then imported from csv using `readr::read_csv()` and saved under *"Participants"* and *"Finance"*, respectively.
+
+```{r}
+participants <- read_csv("data/Participants.csv", show_col_types = FALSE)
+finance <- read_csv("data/FinancialJournal.csv", show_col_types = FALSE)
+```
+
+```{r}
+glimpse(participants)
+glimpse(finance)
+```
+
+# 5. Data Preparation
+
+Prior to delving into data visualization, our initial step involves examining the data to grasp its structure and perform necessary cleaning to prepare for visualization. Upon inspecting both datasets, several issues have been identified.
+
+## 5.1 *Participants* Dataset
+
+The `spec()` function will be used because newer versions of readr don't report the full column specification when loading data files. This function will help us better understand the complete column specification.
+
+To correct problematic columns, we will utilize `dplyr::mutate` to make necessary corrections:
+
+-   **participantId** is in `<dbl>` format. It should be reformatted to \<factor\>.
+-   **interestGroup** is in `<chr>` format. It should be reformatted to \<factor\>.
+-   **educationLevel** is in `<chr>` format. It should be reformatted to factor, and ordered from low to high.
+
+```{r}
+#| code-fold: true
+#| output: false
+
+spec(participants)
+
+participants <- participants %>% mutate_at(c('participantId', 'interestGroup', 'educationLevel'), as.factor)
+
+participants$educationLevel <- ordered(participants$educationLevel, levels = c("Low", "HighSchoolOrCollege", "Bachelors", "Graduate"))
+```
+
+In order to have the flexibility to analyse the age variable in bands, we will also re-code the age variable into 10 year bands using the `cut()` function. The new variable is saved under *age_band*.
+
+```{r}
+#| code-fold: true
+# Recode ages into 10-year age bands
+# Define breaks and labels
+breaks <- seq(10, 70, by = 10)
+labels <- c("10-19", "20-29", "30-39", "40-49", "50-59", "60+")
+
+# Recode age variable
+participants$age_band <- cut(participants$age, breaks = breaks, labels = labels)
+```
+
+## 5.2 *FinancialJournal* Dataset
+
+Much like the Participants dataset, several problems were noted within the FinancialJournal dataset too. These included:
+
+-   **participantId** is in `<dbl>` format. It should be reformatted to `<factor>`.
+
+-   **category** is in `<chr>` format. It should be reformatted to `<factor>`.
+
+```{r}
+#| code-fold: true
+#| output: false
+
+spec(finance)
+finance <-finance %>% mutate_at(c('participantId', 'category'), as.factor)
+```
+
+Currently, the variable *timestamp* provides very micro level breakdown of spending pattern; down to the minute. This may not be useful when trying to understanding broad consumption patterns. As such, using `lubridate::as.Date` the *timestamp* variable was reformatted to *"%Y-%m-%d"* and a new variable, *MonthYear* was created to extract only the year and month data from *timestamp*.
+
+```{r}
+#| code-fold: true
+finance$timestamp <- as.Date(finance$timestamp, format = "%Y-%m-%d")
+
+#Extracting month year
+finance$MonthYear <- format(as.Date(finance$timestamp), "%Y-%m")
+```
+
+The Finance dataset also revealed 1,113 duplicated rows. To ensure accuracy in subsequent analyses, these rows will be eliminated using distinct(). The resulting trimmed dataset will be stored as fin_new.
+
+```{r}
+#| code-fold: true
+fin_new <- finance %>% distinct()
+```
+
+The *amount* variable in the FinancialJournal records money inflow and outflow as positive and negative numbers, respectively. This setup might lead to confusion while visualizing the data. To address this, we'll process the data by taking the absolute values using `abs()`.
+
+```{r}
+#| code-fold: true
+fin_new$amount <- abs(fin_new$amount)
+```
+
+To ensure the data's completeness, we're examining it at the participant level. The histogram displays a distinct cluster showing 131 participants with very few, nearly zero transactions. This could be due to participants dropping out of the study or relocating away from town. Considering the lack of financial data collected from these participants, they will be excluded from further analyses using the `filter()` function.
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+fin_grouped <- fin_new %>%
+  group_by(participantId) %>%
+  dplyr::summarize(transaction_count = n()) %>%
+  arrange(transaction_count)
+
+p <- ggplot(data=fin_grouped, 
+       aes(x = transaction_count)) +
+  geom_histogram(bins = 39,
+                color="black",      
+                fill="steelblue") +
+  ggtitle("Distribution of Transactions among Participants") +
+  xlab("Transaction Count") + 
+  ylab("Number of Participants") +
+  theme_classic()
+
+p <- ggplotly(p, tooltip=c("y"))
+
+# display the plot
+p
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+fin_grouped <- fin_new %>%
+  group_by(participantId) %>%
+  dplyr::summarize(transaction_count = n()) %>%
+  arrange(transaction_count)
+
+p <- ggplot(data=fin_grouped, 
+       aes(x = transaction_count)) +
+  geom_histogram(bins = 39,
+                color="black",      
+                fill="steelblue") +
+  ggtitle("Distribution of Transactions among Participants") +
+  xlab("Transaction Count") + 
+  ylab("Number of Participants") +
+  theme_classic()
+
+p <- ggplotly(p, tooltip=c("y"))
+
+# display the plot
+p
+```
+:::
+
+```{r}
+#| code-fold: true
+# Find participant IDs in fin_grouped with transaction count < 500
+participants_to_remove <- fin_grouped %>%
+  filter(transaction_count < 500) %>%
+  pull(participantId)
+
+# Filter out rows in fin_new for those participants
+fin_new <- fin_new %>%
+  filter(!participantId %in% participants_to_remove)
+```
+
+Currently, the data is in a long format, with each row representing 1 transaction. We will transform the data using `pivot_wider()` to a wide format instead.
+
+```{r}
+fin_final <- fin_new %>%
+  group_by(participantId, category, MonthYear) %>%
+  summarise(Total = sum(amount))
+
+fin_final
+```
+
+```{r}
+fin_final <- pivot_wider(
+  fin_final,names_from = category,values_from =Total)
+fin_final
+```
+
+```{r}
+fin_wide <- fin_final %>%
+  pivot_wider(names_from = MonthYear, values_from = c(Education, Food, Recreation, Shelter, Wage, RentAdjustment))
+fin_wide
+```
+
+```{r}
+#convert all NA values to 0 
+fin_wide[is.na(fin_wide)] <- 0
+```
+
+Before merging, we will create the following new variables using `mutate()`:
+
+-   Total Expenditure across categories, across months e.g., TotExp_Mar
+-   Total Earnings, across months e.g., TotEarn_Mar
+-   Total Savings, across months calculated using TotEarn - TotExp for each month
+
+```{r}
+#| code-fold: true
+
+#Total expenditure across months
+fin_wide <- fin_wide %>%
+  mutate(
+    TotExp_Mar = `Education_2022-03` + `Food_2022-03` + `Recreation_2022-03` + `Shelter_2022-03`,
+    TotExp_Apr = `Education_2022-04` + `Food_2022-04` + `Recreation_2022-04` + `Shelter_2022-04`,
+    TotExp_May = `Education_2022-05` + `Food_2022-05` + `Recreation_2022-05` + `Shelter_2022-05`,
+    TotExp_Jun = `Education_2022-06` + `Food_2022-06` + `Recreation_2022-06` + `Shelter_2022-06`,
+    TotExp_Jul = `Education_2022-07` + `Food_2022-07` + `Recreation_2022-07` + `Shelter_2022-07`,
+    TotExp_Aug = `Education_2022-08` + `Food_2022-08` + `Recreation_2022-08` + `Shelter_2022-08`
+)
+
+#Total Earnings across months
+fin_wide <- fin_wide %>%
+  mutate(
+    TotEarn_Mar = `Wage_2022-03` + ifelse(is.na(`RentAdjustment_2022-03`), 0, `RentAdjustment_2022-03`),
+    TotEarn_Apr = `Wage_2022-04` + ifelse(is.na(`RentAdjustment_2022-04`), 0, `RentAdjustment_2022-04`),
+    TotEarn_May = `Wage_2022-05` + ifelse(is.na(`RentAdjustment_2022-05`), 0, `RentAdjustment_2022-05`),
+    TotEarn_Jun = `Wage_2022-06` + ifelse(is.na(`RentAdjustment_2022-06`), 0, `RentAdjustment_2022-06`),
+    TotEarn_Jul = `Wage_2022-07` + ifelse(is.na(`RentAdjustment_2022-07`), 0, `RentAdjustment_2022-07`),
+    TotEarn_Aug = `Wage_2022-08` + ifelse(is.na(`RentAdjustment_2022-08`), 0, `RentAdjustment_2022-08`))
+
+#Total Savings across months
+fin_wide <- fin_wide %>%
+  mutate(
+    TotSav_Mar = TotEarn_Mar - TotExp_Mar,
+    TotSav_Apr = TotEarn_Apr - TotExp_Apr,
+    TotSav_May = TotEarn_May - TotExp_May,
+    TotSav_Jun = TotEarn_Jun - TotExp_Jun,
+    TotSav_Jul = TotEarn_Jul - TotExp_Jul,
+    TotSav_Aug = TotEarn_Aug - TotExp_Aug
+  )
+```
+
+## 5.3 Combining both Datasets
+
+Finally, utilizing `inner_join()`, the datasets (participants and fin_wide) will be merged, enabling comparisons of financial data across various demographic groups. The resulting dataset will be stored as final_data.
+
+```{r}
+#| code-fold: true
+# inner join the datasets
+# merge the datasets
+merged <- merge(fin_wide, participants, by = "participantId", all.x = TRUE)
+
+# subset the merged dataset to keep only the rows with participantId in fin_wide
+final_data <- subset(merged, participantId %in% fin_wide$participantId)
+```
+
+# 6. Demographic Analysis
+
+For a swift glimpse into the residents' demographic profile, we utilize straightforward pie charts. These visual aids excel at portraying relationships between the whole and its parts, proving especially effective when dealing with a limited number of categories within variables.
+
+## 6.1 Household Size and Kids
+
+Residents of the city tended to have small families; no more than 3 members per household.
+
+All families with 3 members have kids.
+
+```{r}
+#| code-fold: true
+# Calculate the proportion of respondents in each HHsize band category
+final_data$householdSize <- as.factor(final_data$householdSize)
+household_props <- final_data %>%
+  group_by(householdSize) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count / sum(count))
+```
+
+::: panel-tabset
+### Plot
+
+```{r, fig.align='center',fig.height = 3, fig.width = 5}
+#| echo: false
+
+# Create a pie chart with the household size
+p3 <- ggplot(household_props, aes(x = "", y = prop, fill = householdSize)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0, direction = -1) +
+  scale_fill_manual(values = c("pink1", "pink3", "pink4")) +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 8)) +
+  labs(fill = "Household Size") +
+  geom_text(aes(label = paste0(round(prop*100), "%")), position = position_stack(vjust = 0.5), size = 3) +
+  ggtitle("Residents by Household Size(%)")
+p3
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+p3 <- ggplot(household_props, aes(x = "", y = prop, fill = householdSize)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0, direction = -1) +
+  scale_fill_manual(values = c("pink1", "pink3", "pink4")) +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 8)) +
+  labs(fill = "Household Size") +
+  geom_text(aes(label = paste0(round(prop*100), "%")), position = position_stack(vjust = 0.5), size = 3) +
+  ggtitle("Residents by Household Size(%)")
+p3
+```
+:::
+
+```{r}
+# Calculate the percentage of households with kids for each household size
+householdsize_kid_props <- final_data %>%
+  group_by(householdSize,haveKids) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count / sum(count))
+householdsize_kid_props
+```
+
+## 6.2 Age and Education
+
+The age of residents living in the city were relatively evenly distributed, with close to one-third of the population (30%) made up by younger respondents below the ages of 30. Close to half were high school or college educated, while a similar proportion had a bachelor's degree or higher.
+
+::: panel-tabset
+### Plot
+
+```{r, fig.align='center'}
+#| echo: false
+
+# Calculate the proportion of respondents in each age band category
+age_band_props <- final_data %>%
+  group_by(age_band) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count / sum(count))
+
+# Create a pie chart with the age band proportions
+p1 <- ggplot(age_band_props, aes(x = "", y = prop, fill = age_band)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0, direction = -1) +
+  scale_fill_manual(values = c("skyblue1", "skyblue2", "skyblue3", "skyblue4", "darkslategrey", "grey")) +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 8)) +
+  labs(fill = "Age Band") +
+  geom_text(aes(label = paste0(round(prop*100), "%")), position = position_stack(vjust = 0.5), size = 3) +
+  ggtitle("Residents by Age Band (%)")
+
+# Calculate the proportion of respondents in each education band category
+education_props  <- final_data %>%
+  group_by(educationLevel) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count / sum(count))
+
+# Create a pie chart with the age band proportions
+p2 <- ggplot(education_props, aes(x = "", y = prop, fill = educationLevel)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0, direction = -1) +
+  scale_fill_manual(values = c("darkseagreen1", "darkseagreen2", "darkseagreen3", "darkseagreen4")) +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 8)) +
+  labs(fill = "Education Level") +
+  geom_text(aes(label = paste0(round(prop*100), "%")), position = position_stack(vjust = 0.5), size = 3) +
+  ggtitle("Residents by Education Level(%)")
+
+(p1 + p2)
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+# Calculate the proportion of respondents in each age band category
+age_band_props <- final_data %>%
+  group_by(age_band) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count / sum(count))
+
+# Create a pie chart with the age band proportions
+p1 <- ggplot(age_band_props, aes(x = "", y = prop, fill = age_band)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0, direction = -1) +
+  scale_fill_manual(values = c("skyblue1", "skyblue2", "skyblue3", "skyblue4", "darkslategrey", "grey")) +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 8)) +
+  labs(fill = "Age Band") +
+  geom_text(aes(label = paste0(round(prop*100), "%")), position = position_stack(vjust = 0.5), size = 3) +
+  ggtitle("Residents by Age Band (%)")
+
+# Calculate the proportion of respondents in each education band category
+education_props  <- final_data %>%
+  group_by(educationLevel) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count / sum(count))
+
+# Create a pie chart with the age band proportions
+p2 <- ggplot(education_props, aes(x = "", y = prop, fill = educationLevel)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0, direction = -1) +
+  scale_fill_manual(values = c("darkseagreen1", "darkseagreen2", "darkseagreen3", "darkseagreen4")) +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 8)) +
+  labs(fill = "Education Level") +
+  geom_text(aes(label = paste0(round(prop*100), "%")), position = position_stack(vjust = 0.5), size = 3) +
+  ggtitle("Residents by Education Level(%)")
+
+(p1 + p2)
+
+```
+:::
+
+Moving forward, let's investigate the potential correlation between age and education. Given the departure of age distribution from normality, we've opted for the non-parametric Kruskal-Wallis test. After examining the boxplots, it became evident that there isn't a statistically significant correlation between these two variables.
+
+::: callout-note
+This implies that the education levels among younger and older residents were similar. Given that education often relates to income, this discovery might indicate limited social mobility among the city's residents. Consequently, we'll delve into examining the connection between education and wage next
+:::
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+
+ggbetweenstats(
+  data = final_data,
+  x = educationLevel, 
+  y = age,
+  type = "np",
+  mean.ci = TRUE, 
+  pairwise.comparisons = TRUE, 
+  pairwise.display = "s",
+  p.adjust.method = "fdr",
+  messages = FALSE)
+
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+ggbetweenstats(
+  data = final_data,
+  x = educationLevel, 
+  y = age,
+  type = "np",
+  mean.ci = TRUE, 
+  pairwise.comparisons = TRUE, 
+  pairwise.display = "s",
+  p.adjust.method = "fdr",
+  messages = FALSE) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 7),
+        legend.position = "none") +
+  labs(x = "Education Level", y = "Age") +
+  ggtitle("Age by Education Level")
+
+```
+
+### Normality Test
+
+```{r}
+#| echo: false
+
+# Calculate Shapiro-Wilk test statistic and p-value
+sw_test <- shapiro.test(final_data$age)
+sw_stat <- sw_test$statistic
+sw_p <- sw_test$p.value
+
+ggplot(final_data,
+       aes(sample=age)) +
+  stat_qq() +
+  stat_qq_line() +
+  annotate("text", x = -1.5, y = -2.5, 
+           label = paste("Shapiro-Wilk test:", "\n", "statistic =", round(sw_stat, 3), "\n", "p-value =", format(sw_p, scientific = TRUE, digits = 3)), 
+           hjust = 0, vjust = 0, size = 3, color = "black")+
+  ggtitle("Distribution - Age") +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  labs(y = "Age")
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+# Calculate Shapiro-Wilk test statistic and p-value
+sw_test <- shapiro.test(final_data$age)
+sw_stat <- sw_test$statistic
+sw_p <- sw_test$p.value
+
+ggplot(final_data,
+       aes(sample=age)) +
+  stat_qq() +
+  stat_qq_line() +
+  annotate("text", x = -1.5, y = -2.5, 
+           label = paste("Shapiro-Wilk test:", "\n", "statistic =", round(sw_stat, 3), "\n", "p-value =", format(sw_p, scientific = TRUE, digits = 3)), 
+           hjust = 0, vjust = 0, size = 3, color = "black")+
+  ggtitle("Distribution - Age") +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  labs(y = "Age")
+```
+:::
+
+## 6.3 Education and Income
+
+To further explore on income, let's create a new variable *mean_wage*, which is calculated by using `rowMeans()` to find the average of all wage related columns.
+
+```{r}
+#| code-fold: true
+# Select the columns that contain wage information
+wage_cols <- grepl("^Wage", names(final_data))
+
+# Calculate the average wage
+final_data$mean_wage <- rowMeans(final_data[, wage_cols], na.rm = TRUE)
+```
+
+Before proceeding with the confirmed data analysis, a prior check similar to earlier assessments was conducted to test the normality assumption for the average wage distribution among residents. The observed departure from normality in the distribution of average wages, as evident in the QQ plot, led to the decision to utilize a non-parametric test.
+
+Analysis of the boxplot unveiled noticeable variations in residents' wages across different education levels. Notably, individuals with higher educational attainment tended to earn considerably higher wages.
+
+::: callout-note
+Education was found to have a positive correlation with wages. However, in section 6.2, it was observed that education levels across different age groups were not significantly different. To enhance citizens' wages, the City of Engagement can consider implementing strategies to encourage the younger generation to pursue further studies.
+:::
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+
+ggbetweenstats(
+  data = final_data,
+  x = educationLevel, 
+  y = mean_wage,
+  type = "np",
+  mean.ci = TRUE, 
+  pairwise.comparisons = TRUE, 
+  pairwise.display = "s",
+  p.adjust.method = "fdr",
+  messages = FALSE) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 7),
+        legend.position = "none") +
+  labs(x = "Education Level", y = "Income") +
+  ggtitle("Income by Education Level")
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+ggbetweenstats(
+  data = final_data,
+  x = educationLevel, 
+  y = mean_wage,
+  type = "np",
+  mean.ci = TRUE, 
+  pairwise.comparisons = TRUE, 
+  pairwise.display = "s",
+  p.adjust.method = "fdr",
+  messages = FALSE) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 7),
+        legend.position = "none") +
+  labs(x = "Education Level", y = "Income") +
+  ggtitle("Income by Education Level")
+```
+
+### Normality Test
+
+```{r}
+#| echo: false
+
+# Select the columns that contain wage information
+wage_cols <- grepl("^Wage_20", names(final_data))
+
+# Calculate the average wage
+final_data$mean_wage <- rowMeans(final_data[, wage_cols], na.rm = TRUE)
+
+# Calculate Shapiro-Wilk test statistic and p-value
+sw_test <- shapiro.test(final_data$mean_wage)
+sw_stat <- sw_test$statistic
+sw_p <- sw_test$p.value
+
+ggplot(final_data,
+       aes(sample=mean_wage)) +
+  stat_qq() +
+  stat_qq_line() +
+  annotate("text", x = -1.5, y = -2.5, 
+           label = paste("Shapiro-Wilk test:", "\n", "statistic =", round(sw_stat, 3), "\n", "p-value =", format(sw_p, scientific = TRUE, digits = 3)), 
+           hjust = 0.5, vjust = -1.5, size = 3, color = "black")+
+  ggtitle("Distribution - Wage") +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  labs(y = "Wage")
+
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+# Select the columns that contain wage information
+wage_cols <- grepl("^Wage_20", names(final_data))
+
+# Calculate the average wage
+final_data$mean_wage <- rowMeans(final_data[, wage_cols], na.rm = TRUE)
+
+# Calculate Shapiro-Wilk test statistic and p-value
+sw_test <- shapiro.test(final_data$mean_wage)
+sw_stat <- sw_test$statistic
+sw_p <- sw_test$p.value
+
+ggplot(final_data,
+       aes(sample=mean_wage)) +
+  stat_qq() +
+  stat_qq_line() +
+  annotate("text", x = -1.5, y = -2.5, 
+           label = paste("Shapiro-Wilk test:", "\n", "statistic =", round(sw_stat, 3), "\n", "p-value =", format(sw_p, scientific = TRUE, digits = 3)), 
+           hjust = 0.5, vjust = -1.5, size = 3, color = "black")+
+  ggtitle("Distribution - Wage") +
+  theme_classic() +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+       axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  labs(y = "Wage")
+
+```
+:::
+
+# 7. Consumption Pattern
+
+## 7.1 Overall Financial Health
+
+In order to analyze earning and spending overtime. A new dataframe named *'Earn_Exp_avg'* with the following variables will be created:
+
+-   **Month:** Date in 'YYYY-MM' format
+
+-   **EducationLevel:** No change from original data
+
+-   **Avg_Earning:** Average monthly earnings i.e., both wage and rentadjustments
+
+-   **Avg_Expenditure:** Average monthly expenditure
+
+-   **Avg_Savings:** Calculated variable deducting monthly expenditure from monthly earnings
+
+```{r}
+#| code-fold: true
+
+#Transform Earning Data to long form
+Earn_data_long <- final_data %>%
+  select(participantId, educationLevel, starts_with("TotEarn")) %>%
+  gather(key = "Month", value = "Earning", starts_with("TotEarn"))
+
+Earn_data_long_renamed <- Earn_data_long %>% 
+  mutate(Month = case_when(
+    Month == "TotEarn_Mar" ~ "2022-03",
+    Month == "TotEarn_Apr" ~ "2022-04",
+    Month == "TotEarn_May" ~ "2022-05",
+    Month == "TotEarn_Jun" ~ "2022-06",
+    Month == "TotEarn_Jul" ~ "2022-07",
+    Month == "TotEarn_Aug" ~ "2022-08",
+    TRUE ~ Month
+  )) %>% 
+  rename(Month_renamed = Month)
+
+Earn_data_long_renamed$Month <- as.Date(paste0(Earn_data_long_renamed$Month, "-01"), format = "%Y-%m-%d")
+
+Earn_data_long_renamed <- as_tibble(Earn_data_long_renamed)
+
+#Transform Exp Data to long form
+Exp_data_long <- final_data %>%
+  select(participantId, educationLevel, starts_with("TotExp")) %>%
+  mutate(across(starts_with("TotExp"), ~coalesce(., 0))) %>%
+  gather(key = "Month", value = "Expenditure", starts_with("TotExp"))
+
+Exp_data_long_renamed <- Exp_data_long %>% 
+  mutate(Month = case_when(
+    Month == "TotExp_Mar" ~ "2022-03",
+    Month == "TotExp_Apr" ~ "2022-04",
+    Month == "TotExp_May" ~ "2022-05",
+    Month == "TotExp_Jun" ~ "2022-06",
+    Month == "TotExp_Jul" ~ "2022-07",
+    Month == "TotExp_Aug" ~ "2022-08",
+    TRUE ~ Month
+  )) %>% 
+  rename(Month_renamed = Month)
+
+Exp_data_long_renamed$Month <- as.Date(paste0(Earn_data_long_renamed$Month, "-01"), format = "%Y-%m-%d")
+
+Exp_data_long_renamed <- as_tibble(Exp_data_long_renamed)
+#sum(is.na(Exp_data_long_renamed$Expenditure))
+
+# Group and summarize earning data by month
+Earn_data_avg <- Earn_data_long_renamed %>% 
+  group_by(Month, educationLevel) %>% 
+  summarize(avg_earning = mean(Earning))
+
+# Group and summarize expenditure data by month
+Exp_data_avg <- Exp_data_long_renamed %>% 
+  group_by(Month, educationLevel) %>% 
+  summarize(avg_expenditure = mean(Expenditure))
+
+Earn_Exp_avg <- full_join(Earn_data_avg, Exp_data_avg, 
+                           by = c("educationLevel", "Month"))
+
+# Create a new column for savings
+Earn_Exp_avg$savings <- Earn_Exp_avg$avg_earning - Earn_Exp_avg$avg_expenditure
+
+#Round values to 2dp
+Earn_Exp_avg$avg_expenditure <- round(Earn_Exp_avg$avg_expenditure, 2)
+Earn_Exp_avg$avg_earning <- round(Earn_Exp_avg$avg_earning, 2)
+Earn_Exp_avg$savings <- round(Earn_Exp_avg$savings, 2)
+
+#Rename Columns 
+Earn_Exp_avg <- Earn_Exp_avg %>% rename(Education_Level = educationLevel, Avg_Earning = avg_earning, Avg_Expenditure = avg_expenditure, Avg_Savings = savings)
+```
+
+The charts below illustrate that residents' monthly expenditures remained relatively constant across different education levels throughout the months. Despite an earnings surge in March, expenditure levels remained notably low. It's worth highlighting that individuals with higher wages tended to save more monthly, as indicated in the highlighted yellow section, rather than increasing their spending.
+
+::: callout-note
+This shows a good sign of financial health across all education levels.
+:::
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+
+# Create a ggplot object with the data
+p <-ggplot(data = Earn_Exp_avg, aes(x = Month)) +
+  geom_line(aes(y = Avg_Earning, color = "Avg_Earning")) +
+  geom_line(aes(y = Avg_Expenditure, color = "Avg_Expenditure")) +
+  geom_ribbon(aes(ymin = Avg_Expenditure, ymax = Avg_Earning), fill = "yellow", alpha = 0.3) +
+  scale_color_manual(name = NULL, values = c("Avg_Earning" = "steelblue", "Avg_Expenditure" = "orange"), 
+                     labels = c("Average Earnings", "Average Expenditure")) +
+  labs(title = "Average Earnings and Expenditure per Month",
+       x = "Month",
+       y = "Amount") +
+  theme_classic() +
+  facet_wrap(~ Education_Level, ncol = 1, scales = "free_y") +
+  ylim(0, 10000) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 6))
+
+# Convert the ggplot object to an interactive plotly object and modify the hoverinfo argument
+p <- ggplotly(p, height = 500, tooltip = c("Avg_Earning", "Avg_Expenditure")) %>%
+  layout(hoverlabel = list(bgcolor = "white"))
+
+# Set the legend position to "bottom"
+p <- layout(p, legend = list(orientation = "h", x = 0.25, y = -0.1))
+
+# Display the plot
+p
+
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+# Create a ggplot object with the data
+p <-ggplot(data = Earn_Exp_avg, aes(x = Month)) +
+  geom_line(aes(y = Avg_Earning, color = "Avg_Earning")) +
+  geom_line(aes(y = Avg_Expenditure, color = "Avg_Expenditure")) +
+  geom_ribbon(aes(ymin = Avg_Expenditure, ymax = Avg_Earning), fill = "yellow", alpha = 0.3) +
+  scale_color_manual(name = NULL, values = c("Avg_Earning" = "steelblue", "Avg_Expenditure" = "orange"), 
+                     labels = c("Average Earnings", "Average Expenditure")) +
+  labs(title = "Average Earnings and Expenditure per Month",
+       x = "Month",
+       y = "Amount") +
+  theme_classic() +
+  facet_wrap(~ Education_Level, ncol = 1, scales = "free_y") +
+  ylim(0, 10000) +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 6))
+
+# Convert the ggplot object to an interactive plotly object and modify the hoverinfo argument
+p <- ggplotly(p, height = 500, tooltip = c("Avg_Earning", "Avg_Expenditure")) %>%
+  layout(hoverlabel = list(bgcolor = "white"))
+
+# Set the legend position to "bottom"
+p <- layout(p, legend = list(orientation = "h", x = 0.25, y = -0.1))
+
+# Display the plot
+p
+
+```
+:::
+
+## 7.2 Spending Pattern
+
+To further examine on spending, let's create a new dataframe called *spending_summary*:
+
+-   Education
+
+-   Food
+
+-   Recreation
+
+-   Shelter
+
+-   Mean Spending
+
+```{r}
+#| code-fold: true
+
+
+# Create New variable for total average education expenditure
+final_data$Education <- rowMeans(final_data[c("Education_2022-03", "Education_2022-04", "Education_2022-05","Education_2022-06", "Education_2022-07", "Education_2022-08")])
+
+# Create New variable for total average food expenditure
+final_data$Food<- rowMeans(final_data[c("Food_2022-03", "Food_2022-04", "Food_2022-05","Food_2022-06", "Food_2022-07", "Food_2022-08")])
+
+# Create New variable for total average recreation expenditure
+final_data$Recreation<- rowMeans(final_data[c("Recreation_2022-03", "Recreation_2022-04", "Recreation_2022-05","Recreation_2022-06", "Recreation_2022-07", "Recreation_2022-08")])
+
+# Create New variable for total average shelter expenditure
+final_data$Shelter<- rowMeans(final_data[c("Shelter_2022-03", "Shelter_2022-04", "Shelter_2022-05","Shelter_2022-06", "Shelter_2022-07", "Shelter_2022-08")])
+
+# Round the result to 2 decimal places
+final_data$Education <- round(final_data$Education, 2)
+final_data$Food <- round(final_data$Food, 2)
+final_data$Recreation <- round(final_data$Recreation, 2)
+final_data$Shelter <- round(final_data$Shelter, 2)
+
+# Calculate the mean spending for each category
+mean_spending <- c(mean(final_data$Education), mean(final_data$Food), 
+                   mean(final_data$Recreation), mean(final_data$Shelter))
+
+# Create a data frame with the mean spending for each category
+spending_summary <- data.frame(Category = c("Education", "Food", "Recreation", "Shelter"),
+                               Mean_Spending = mean_spending)
+```
+
+From the bar chart below, we see that a approximately half of total monthly expenditure was spent on shelter. This was followed by recreational activities, then food and lastly education.
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+
+# Create a bar chart of the mean spending for each category
+spending_summary %>%
+  mutate(Category = reorder(Category, -Mean_Spending)) %>%
+  ggplot(aes(x = Category, y = Mean_Spending)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = paste0("$", round(Mean_Spending, 2))), vjust = -0.5) +
+  ggtitle("Average Monthly Spending by Category") +
+  xlab("Category") +
+  ylab("Average Monthly Spending") +
+  theme_classic() +  
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10))
+
+
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+# Create a bar chart of the mean spending for each category
+spending_summary %>%
+  mutate(Category = reorder(Category, -Mean_Spending)) %>%
+  ggplot(aes(x = Category, y = Mean_Spending)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = paste0("$", round(Mean_Spending, 2))), vjust = -0.5) +
+  ggtitle("Average Monthly Spending by Category") +
+  xlab("Category") +
+  ylab("Average Monthly Spending") +
+  theme_classic() +  
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10))
+
+```
+:::
+
+# 8. Joviality (Happiness)
+
+## 8.1 Financial Health and Joviality
+
+Linking financial well-being to happiness seems reasonable. Let's investigate the hypothesis that these variables have a positive correlation---that higher wealth or more savings correspond to greater happiness. However, the scatter plot presents a contrasting picture. Specifically, in the top-left corner, instances of residents with substantial savings exhibit low scores in joviality, indicating a contradiction to the expected positive relationship between savings and happiness.
+
+::: callout-note
+In contrast to our initial hypothesis, there was a negative correlation discovered between monthly savings and joviality. This unexpected finding might be attributed to external stressors associated with higher-paying jobs. It could prove beneficial for the local council to engage with high earners in the city to offer more comprehensive support for their overall well-being.
+:::
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+
+# Create New variable for Savings
+final_data$Avg_Savings <- rowMeans(final_data[, c("TotSav_Mar", "TotSav_Apr", "TotSav_May","TotSav_Jun", "TotSav_Jul", "TotSav_Aug")])
+
+# Round the result to 2 decimal places
+final_data$Avg_Savings <- round(final_data$Avg_Savings, 2)
+
+plot_ly(data = final_data, 
+        x = ~joviality, 
+        y = ~Avg_Savings,
+        color = ~educationLevel,
+        type = "scatter",
+        mode   = 'markers') %>%
+  add_trace(
+    text = ~paste("Joviality: ", joviality, "<br>",
+                  "Avg Savings: $", Avg_Savings),
+    hoverinfo = "text",
+    showlegend = FALSE
+  ) %>%
+  layout(
+    title = "Correlation between Joviality and Savings by Education",
+    xaxis = list(title = "Joviality Score"),
+    yaxis = list(title = "Average Savings"),
+    margin = list(l = 60, r = 10, t = 60, b = 30),
+    plot_bgcolor = "white",
+    paper_bgcolor = "white",
+    font = list(color = "black"),
+    hoverlabel = list(bgcolor = "white", font = list(color = "black")),
+    legend = list(title = "Education Level", font = list(color = "black"))
+  )
+
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+# Create New variable for Savings
+final_data$Avg_Savings <- rowMeans(final_data[, c("TotSav_Mar", "TotSav_Apr", "TotSav_May","TotSav_Jun", "TotSav_Jul", "TotSav_Aug")])
+
+# Round the result to 2 decimal places
+final_data$Avg_Savings <- round(final_data$Avg_Savings, 2)
+
+plot_ly(data = final_data, 
+        x = ~joviality, 
+        y = ~Avg_Savings,
+        color = ~educationLevel,
+        type = "scatter",
+        mode   = 'markers') %>%
+  add_trace(
+    text = ~paste("Joviality: ", joviality, "<br>",
+                  "Avg Savings: $", Avg_Savings),
+    hoverinfo = "text",
+    showlegend = FALSE
+  ) %>%
+  layout(
+    title = "Correlation between Joviality and Savings by Education",
+    xaxis = list(title = "Joviality Score"),
+    yaxis = list(title = "Average Savings"),
+    margin = list(l = 60, r = 10, t = 60, b = 30),
+    plot_bgcolor = "white",
+    paper_bgcolor = "white",
+    font = list(color = "black"),
+    hoverlabel = list(bgcolor = "white", font = list(color = "black")),
+    legend = list(title = "Education Level", font = list(color = "black"))
+  )
+
+```
+
+### Statistical Test
+
+```{r}
+#| echo: false
+
+ggscatterstats(
+  data = final_data,
+  x = joviality,
+  y = Avg_Savings,
+  marginal = FALSE,
+  ) + 
+ggtitle("Correlation betwen Joviality and Savings") +
+labs(x = "Joviality Score", y = "Average Savings")
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+ggscatterstats(
+  data = final_data,
+  x = joviality,
+  y = Avg_Savings,
+  marginal = FALSE,
+  ) + 
+ggtitle("Correlation betwen Joviality and Savings") +
+labs(x = "Joviality Score", y = "Average Savings")
+```
+:::
+
+## 8.2 Recreation and Joviality
+
+Other than financial stability, finding fulfillment in activities outside of work could be a significant contributor to happiness. To delve into this, we're using expenditure on recreational activities as an indicator. This helps us examine whether individuals who allocate more towards recreational spending tend to report higher scores in joviality.
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+
+ggscatterstats(
+  data = final_data,
+  x = joviality,
+  y = Recreation,
+  marginal = FALSE,
+  ) + 
+ggtitle("Correlation betwen Joviality and Recreation") +
+labs(x = "Joviality Score", y = "Recreation Expenditure")
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+ggscatterstats(
+  data = final_data,
+  x = joviality,
+  y = Recreation,
+  marginal = FALSE,
+  ) + 
+ggtitle("Correlation betwen Joviality and Recreation") +
+labs(x = "Joviality Score", y = "Recreation Expenditure")
+```
+:::
+
+Breaking down this relationship further by interest groups, we also observe that this positive correlation is true, across all groups.
+
+::: callout-note
+This discovery indicates that active involvement in interest groups can lead to happier and more fulfilling lives. Hence, it's crucial for the local council to focus on this aspect. For instance, understanding residents' preferences and identifying existing infrastructure gaps can aid in better resource allocation and encourage increased participation in these activities.
+:::
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+ 
+ggscatterstats(
+  data = final_data,
+  x = joviality,
+  y = Recreation,
+  marginal = FALSE,
+  ) + 
+  ggtitle("Correlation between Joviality and Recreation") +
+  labs(x = "Joviality Score", y = "Recreation Expenditure") +
+  facet_wrap(~interestGroup)
+
+```
+
+### Data
+
+```{r}
+#| eval: true
+#| output: false
+
+ggscatterstats(
+  data = final_data,
+  x = joviality,
+  y = Recreation,
+  marginal = FALSE,
+  ) + 
+  ggtitle("Correlation between Joviality and Recreation Expenditure by Interest Groups") +
+  labs(x = "Joviality Score", y = "Recreation Expenditure") +
+  facet_wrap(~interestGroup)
+
+```
+:::
+
+## 8.3 Age and Joviality
+
+Upon reviewing the scatter plot below, a slight negative correlation seems apparent between age and joviality.
+
+::: panel-tabset
+### Plot
+
+```{r}
+#| echo: false
+ggscatterstats(
+  data = final_data,
+  x = age,
+  y = joviality,
+  marginal = FALSE,
+  )
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+ggscatterstats(
+  data = final_data,
+  x = age,
+  y = joviality,
+  marginal = FALSE,
+  )
+```
+:::
+
+Upon closer examination of the distribution of joviality scores categorized by 10-year age groups, a prominent peak is observable among residents in their 50s, suggesting a concentration of scores around 0.4 and below. Subsequently, this distribution gradually decreases as joviality scores increase.
+
+::: callout-note
+Given that older residents have been significant contributors to the community, the data strongly implies a need for further investigation into the factors contributing to their lower joviality scores. Addressing the well-being of older residents not only ensures their proper care but also provides reassurance to younger residents, knowing that their parents are well looked after and that similar support will be available to them in the future.
+:::
+
+::: panel-tabset
+### Distribution
+
+```{r}
+#| echo: false
+
+ggplot(final_data, 
+       aes(x = joviality, 
+           y = age_band,
+           fill = stat(x))) +
+  geom_density_ridges_gradient(
+    scale = 3,
+    rel_min_height = 0.01) +
+  scale_fill_viridis_c(name = "Temp. [F]",
+                       option = "C") +
+  scale_x_continuous(
+    name = "Joviality Scores",
+    expand = c(0, 0)
+  ) +
+  scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +
+  ggtitle("Joviality Scores by Age Bands") +
+  theme_ridges()
+```
+
+### Code
+
+```{r}
+#| eval: true
+#| output: false
+
+ggplot(final_data, 
+       aes(x = joviality, 
+           y = age_band,
+           fill = stat(x))) +
+  geom_density_ridges_gradient(
+    scale = 3,
+    rel_min_height = 0.01) +
+  scale_fill_viridis_c(name = "Temp. [F]",
+                       option = "C") +
+  scale_x_continuous(
+    name = "Joviality Scores",
+    expand = c(0, 0)
+  ) +
+  scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +
+  theme_ridges()
+```
+:::
+
+# 9. Conclusions and Suggestions
+
+Considering the demographics and trends observed in the City of Engagement, several recommendations can be made to enhance the overall well-being of its residents:
+
+1.  **Promote Higher Education for Long-Term Prosperity:** Despite an even split in education levels across age groups, fostering higher education among younger residents could significantly impact their future. Given the strong correlation between education and income, initiatives encouraging further education among the younger population could improve their long-term quality of life. This could involve targeted educational programs or incentives aimed at enhancing educational attainment.
+
+2.  **Focus on Recreation for Happiness:** Financial stability alone did not translate into higher happiness scores. Instead, residents who allocated more towards recreational activities reported higher joviality. Allocating resources and encouraging participation in such activities could lead to greater overall happiness. Strategic allocation of funds and initiatives promoting community engagement in recreational pursuits could be fruitful.
+
+3.  **Supporting Aging Residents:** With a noted decline in joviality scores among older residents, it's crucial to address their concerns. Initiating programs aimed at understanding and supporting the needs of older residents can significantly impact their well-being. This could involve creating support networks, enhancing healthcare access, and providing social opportunities tailored to their preferences.
+
+By focusing on educational empowerment, fostering recreational engagement, and extending support to the aging population, the City of Engagement can elevate the overall quality of life for its residents while fostering a more cohesive and content community.
+
+# 10. Credit
+
+I would like to thank Prof Kam for his lectures on R data analysis.
+
+
