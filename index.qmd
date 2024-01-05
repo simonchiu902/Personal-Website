@@ -10,7 +10,9 @@ format:
 
 ### Welcome to my website
 
-On this website, I share various data analytics projects and tutorial articles.
+I utilized RStudio to construct this website and subsequently hosted it on Netlify.
+
+Here, I share various data analytics projects and tutorial articles.
 
 I hope these resources provide insight into my data analytics journey and offer valuable information for you.
 
