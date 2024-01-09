@@ -1250,5 +1250,3 @@ By focusing on educational empowerment, fostering recreational engagement, and e
 # 10. Credit
 
 I would like to thank Prof Kam for his lectures on R data analysis.
-
-

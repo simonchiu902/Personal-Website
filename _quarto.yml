@@ -10,6 +10,8 @@ website:
         menu:
           - text: "Population Visual Analysis"
             href: "Data_Analytics_Projects/Population Visual Analysis/Population_Visual_Analysis.html"
+          - text: "Fruad Detection"
+            href: "Data_Analytics_Projects/Fraud Detection/Fraud_Detection.html"
       - text: "Quarto Tutorial Articles"
         menu:
           - text: "How to build a Quarto website"
