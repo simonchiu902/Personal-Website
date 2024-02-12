@@ -18,6 +18,10 @@ website:
             href: "Quarto_tutorial_articles/Quarto_Article1/Quarto_Article1.html"
           - text: "Custom Quarto Website"
             href: "Quarto_tutorial_articles/Quarto_Article2/Quarto_Article2.html"
+      - text: "PowerBI Tutorial Articles"
+        menu:
+          - text: "How to import data from Jira"
+            href: "PowerBI_tutorial_articles/Jira_with_PowerBI/Jira_with_PowerBI.html"
     right:
       - icon: github
         href: https://github.com/simonchiu902/Personal-Website

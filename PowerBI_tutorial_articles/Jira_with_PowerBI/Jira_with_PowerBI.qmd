@@ -1,0 +1,27 @@
+---
+title: "Jira_with_PowerBI"
+author: "Simon Chiu"
+date: last-modified
+---
+
+# 1. Introduction
+
+Jira itself can perform several analyses for project management. However, if we import data into Power BI, we can perform more in-depth and flexible analyses. Since there is no complete tutorial online, in this article, I'll share a complete step-by-step tutorial on how to import data from Jira into Power BI and also how to solve the refreshment problem.
+
+# 2. Generate Jira Token
+
+We need to first get the Jira token to connect to Power BI.
+
+Go to [Manage API](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/) to generate Jira Token. The token won\'t expire unless you revoke it.
+
+![](image/Picture1.png)
+
+# 2. Convert Token to Base64 format
+
+After getting the token, the next step is to convert it to base64 format.
+
+This can be done in two ways:
+
+1.  
+
+
