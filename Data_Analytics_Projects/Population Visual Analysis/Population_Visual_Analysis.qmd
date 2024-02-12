@@ -1,7 +1,6 @@
 ---
 title: "Demographic Visual Analysis"
 author: "Simon Chiu"
-date: last-modified
 execute: 
   warning: false
 ---

@@ -1,7 +1,6 @@
 ---
 title: "Custom Quarto Website"
 author: "Simon Chiu"
-date: last-modified
 editor: visual
 ---
 

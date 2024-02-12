@@ -1,7 +1,6 @@
 ---
 title: "Jira_with_PowerBI"
 author: "Simon Chiu"
-date: last-modified
 ---
 
 # 1. Introduction
