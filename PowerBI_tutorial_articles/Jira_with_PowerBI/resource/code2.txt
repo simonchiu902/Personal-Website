@@ -1,0 +1,35 @@
+let
+
+FetchPages = (pageSize as number) =>
+
+let
+
+Source = GenerateByPage(
+
+(previous) =>
+
+let
+
+skipRows = if previous = null then 0 else Value.Metadata(previous)[skipRows],
+
+totalItems = if previous = null then 0 else Value.Metadata(previous)[total],
+
+table = if previous = null or Table.RowCount(previous) = pageSize then
+
+FetchPage(pageSize, skipRows)
+
+else null
+
+in table,
+
+ 
+
+type table [Column1])
+
+in
+
+Source
+
+in
+
+FetchPages

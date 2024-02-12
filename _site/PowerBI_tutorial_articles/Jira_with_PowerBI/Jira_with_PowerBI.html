@@ -148,7 +148,9 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">1. Introduction</a></li>
   <li><a href="#generate-jira-token" id="toc-generate-jira-token" class="nav-link" data-scroll-target="#generate-jira-token">2. Generate Jira Token</a></li>
-  <li><a href="#convert-token-to-base64-format" id="toc-convert-token-to-base64-format" class="nav-link" data-scroll-target="#convert-token-to-base64-format">2. Convert Token to Base64 format</a></li>
+  <li><a href="#convert-token-to-base64-format" id="toc-convert-token-to-base64-format" class="nav-link" data-scroll-target="#convert-token-to-base64-format">3. Convert Token to Base64 format</a></li>
+  <li><a href="#import-data-into-power-bi" id="toc-import-data-into-power-bi" class="nav-link" data-scroll-target="#import-data-into-power-bi">4. Import Data into Power BI</a></li>
+  <li><a href="#publish-and-set-schedule-refreshment" id="toc-publish-and-set-schedule-refreshment" class="nav-link" data-scroll-target="#publish-and-set-schedule-refreshment">5. Publish and Set Schedule Refreshment</a></li>
   </ul>
 </nav>
     </div>
@@ -190,16 +192,75 @@ ul.task-list li input[type="checkbox"] {
 <section id="generate-jira-token" class="level1">
 <h1>2. Generate Jira Token</h1>
 <p>We need to first get the Jira token to connect to Power BI.</p>
-<p>Go to <a href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/">Manage API</a> to generate Jira Token. The token won't expire unless you revoke it.</p>
+<p>Go to <a href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/">Manage API</a> to generate Jira Token. The token won’t expire unless you revoke it.</p>
 <p><img src="image/Picture1.png" class="img-fluid"></p>
 </section>
 <section id="convert-token-to-base64-format" class="level1">
-<h1>2. Convert Token to Base64 format</h1>
+<h1>3. Convert Token to Base64 format</h1>
 <p>After getting the token, the next step is to convert it to base64 format.</p>
 <p>This can be done in two ways:</p>
 <ol type="1">
-<li></li>
+<li>Use this excel file <a href="https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/Base64%20Encode%20(1).xlsm">Base64Encode.xlsm</a> (Reference: <a href="https://www.youtube.com/watch?v=AU4iwjDahDY&amp;t=194s">Encode Base64 in Excel VBA - YouTube</a>).</li>
+<li>Use this Python code <a href="https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/jira_api_turtorial.ipynb">jira_api_turtorial.ipynb.</a></li>
 </ol>
+</section>
+<section id="import-data-into-power-bi" class="level1">
+<h1>4. Import Data into Power BI</h1>
+<p>One limitation of using Jira API to ingest data is a single API call restricts to a maximum of 100 subsequent records to be retrieved. To retrieve all records, multiple smaller requests are made using the API and Pagination. (<a href="https://jira.atlassian.com/browse/JRACLOUD-67570?_ga=2.101507137.1902640455.1505929864-863697658.1500488616">Reference</a>). Following steps will show you how to do it step by step.</p>
+<ol type="1">
+<li><p>Select ‘Transform Data’ to open the Power Query Editor. (<a href="https://medium.com/@ferdikoopacc/atlassian-jira-data-in-powerbi-f2baea416107#:~:text=The%20Jira%20API%20does%20not,open%20the%20Power%20Query%20Editor.">Reference</a>)<br>
+<img src="image/Picture2.png" class="img-fluid"></p></li>
+<li><p>Create a “New Group” and name it “Jira”<br>
+<img src="image/Picture3.png" class="img-fluid"></p></li>
+<li><p>In the Jira group (folder) create a Blank Query and then right click it to open the query in the ‘Advanced Editor’.</p>
+<p><img src="image/Picture4.png" class="img-fluid"></p></li>
+<li><p>Replace the code with <a href="https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/code1.txt">this code</a> in the Advanced Editor.<br>
+<img src="image/Picture5.png" class="img-fluid"><br>
+After replacing the code, we need to do some modifications.<br>
+First, replace <code>ihhgroupdata</code> with your company domain name.<br>
+<img src="image/Picture6.png" class="img-fluid"><br>
+Second, replace the <code>Base64_here</code> with the base64 encoded string that was generated in Section 3. Remember to keep the <code>Basic</code> in front of it. (Make sure you keep a space after Basic) <img src="image/Picture7.png" class="img-fluid"><br>
+Third, replace IHHITREQ (E.g. Or your JIRA Project) with your project key. (Your key can be found in your Jira website.) If you want to further include more projects, you can do like this: project in <code>('IHHITREQ','project1','project2')</code><br>
+<img src="image/Picture9.png" class="img-fluid"><br>
+<img src="image/Picture8.png" class="img-fluid"><br>
+Fourth, you can also change the query to your desired data range by modifying this part.<br>
+<img src="image/Picture10.png" class="img-fluid"><br>
+When done rename the query to <code>FetchPage</code>.</p></li>
+<li><p>Create a <a href="https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/code2.txt">second query</a> and rename it to <code>FetchPages</code> and copy the following code into it.</p></li>
+<li><p>If an error pops up with the following message ignore it — this will be solved after creating (and renaming) the third query: <em>Expression.Error: The name ‘GenerateByPage’ wasn’t recognized. Make sure it’s spelled correctly.<br>
+</em><img src="image/Picture11.png" class="img-fluid"></p></li>
+<li><p>Create a <a href="https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/code3.txt">third Query</a> and rename it to <code>GenerateByPage</code> .</p></li>
+<li><p>The result queries so far should be:</p>
+<ol type="1">
+<li><p><code>FetchPage</code></p></li>
+<li><p><code>FetchPages</code></p></li>
+<li><p><code>GenerateByPage</code></p></li>
+</ol></li>
+<li><p>The final step before the data can be used in PowerBI is to invoke the ‘FetchPage’ query. Input 50 in pageSize window and click Invoke button.<br>
+<img src="image/Picture12.png" class="img-fluid"></p></li>
+<li><p>If this error pops up, please click <code>Edit Credential</code>.<br>
+<img src="image/Picture13.png" class="img-fluid"><br>
+And then use this setting to connect.<br>
+<img src="image/Picture14.png" class="img-fluid"></p></li>
+<li><p>After invoking the query, query result should pop up. Based on your need, you can expand columns and do your own data transformation. <img src="image/Picture15.png" class="img-fluid"><br>
+<img src="image/Picture16.png" class="img-fluid"></p></li>
+</ol>
+</section>
+<section id="publish-and-set-schedule-refreshment" class="level1">
+<h1>5. Publish and Set Schedule Refreshment</h1>
+<p>After you finish your dashboard and publish it, you may encounter this refreshment problem.</p>
+<p><img src="image/Picture17.png" class="img-fluid"></p>
+<p><img src="image/Picture18.png" class="img-fluid"></p>
+<p>To solve it, click on the three dots and select Settings.</p>
+<p><img src="image/Picture19.png" class="img-fluid"></p>
+<p>Find the Data source credentials option and click Edit credentials.</p>
+<p><img src="image/Picture20.png" class="img-fluid"></p>
+<p>A window will pop up. Fill in the windows like below and click Sign in.</p>
+<p><img src="image/Picture21.png" class="img-fluid"></p>
+<p>Find the Refresh option, which is located under the Data Source Credentials option we just used. Turn on the Refresh option and configure it based on your needs.</p>
+<p><img src="image/Picture22.png" class="img-fluid"></p>
+<p>After applying the settings, try refreshing your report again. It should work fine now.</p>
+<p><img src="image/Picture23.png" class="img-fluid"></p>
 
 
 </section>

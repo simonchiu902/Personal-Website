@@ -1,0 +1,23 @@
+let
+
+FetchPage = (pageSize as number, skipRows as number) as table =>
+
+let
+
+//Here is where you run the code that will return a single page
+
+contents = Web.Contents("https://ihhgroupdata.atlassian.net/rest/api/3/search",[Headers=[#"Authorization" = "Basic Base64_here"], Query = [jql = "project in ('IHHITREQ') and created >= '2023-08-01' and created <= '2023-12-31'", maxResults= Text.From(pageSize), startAt = Text.From(skipRows)]]),
+
+json = Json.Document(contents),
+
+Value = json[issues],
+
+table = Table.FromList(Value, Splitter.SplitByNothing(), null, null, ExtraValues.Error)
+
+in
+
+table meta [skipRows = skipRows + pageSize, total = 500]
+
+in
+
+FetchPage

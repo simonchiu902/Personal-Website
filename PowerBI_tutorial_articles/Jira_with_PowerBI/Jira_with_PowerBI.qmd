@@ -12,16 +12,129 @@ Jira itself can perform several analyses for project management. However, if we 
 
 We need to first get the Jira token to connect to Power BI.
 
-Go to [Manage API](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/) to generate Jira Token. The token won\'t expire unless you revoke it.
+Go to [Manage API](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/) to generate Jira Token. The token won't expire unless you revoke it.
 
 ![](image/Picture1.png)
 
-# 2. Convert Token to Base64 format
+# 3. Convert Token to Base64 format
 
 After getting the token, the next step is to convert it to base64 format.
 
 This can be done in two ways:
 
-1.  
+1.  Use this excel file [Base64Encode.xlsm](https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/Base64%20Encode%20(1).xlsm) (Reference: [Encode Base64 in Excel VBA - YouTube](https://www.youtube.com/watch?v=AU4iwjDahDY&t=194s)).
+2.  Use this Python code [jira_api_turtorial.ipynb.](https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/jira_api_turtorial.ipynb)
+
+# 4. Import Data into Power BI
+
+One limitation of using Jira API to ingest data is a single API call restricts to a maximum of 100 subsequent records to be retrieved. To retrieve all records, multiple smaller requests are made using the API and Pagination. ([Reference](https://jira.atlassian.com/browse/JRACLOUD-67570?_ga=2.101507137.1902640455.1505929864-863697658.1500488616)). Following steps will show you how to do it step by step.
+
+1.  Select 'Transform Data' to open the Power Query Editor. ([Reference](https://medium.com/@ferdikoopacc/atlassian-jira-data-in-powerbi-f2baea416107#:~:text=The%20Jira%20API%20does%20not,open%20the%20Power%20Query%20Editor.))\
+    ![](image/Picture2.png)
+
+2.  Create a "New Group" and name it "Jira"\
+    ![](image/Picture3.png)
+
+3.  In the Jira group (folder) create a Blank Query and then right click it to open the query in the 'Advanced Editor'.
+
+    ![](image/Picture4.png)
+
+4.  Replace the code with [this code](https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/code1.txt) in the Advanced Editor.\
+    ![](image/Picture5.png)\
+    After replacing the code, we need to do some modifications.\
+    First, replace `ihhgroupdata` with your company domain name.\
+    ![](image/Picture6.png)\
+    Second, replace the `Base64_here` with the base64 encoded string that was generated in Section 3. Remember to keep the `Basic` in front of it. (Make sure you keep a space after Basic) ![](image/Picture7.png)\
+    Third, replace IHHITREQ (E.g. Or your JIRA Project) with your project key. (Your key can be found in your Jira website.) If you want to further include more projects, you can do like this: project in `('IHHITREQ','project1','project2')`\
+    ![](image/Picture9.png)\
+    ![](image/Picture8.png)\
+    Fourth, you can also change the query to your desired data range by modifying this part.\
+    ![](image/Picture10.png)\
+    When done rename the query to `FetchPage`.
+
+5.  Create a [second query](https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/code2.txt) and rename it to `FetchPages` and copy the following code into it.
+
+6.  If an error pops up with the following message ignore it --- this will be solved after creating (and renaming) the third query: *Expression.Error: The name 'GenerateByPage' wasn't recognized. Make sure it's spelled correctly.\
+    *![](image/Picture11.png)
+
+7.  Create a [third Query](https://github.com/simonchiu902/Personal-Website/blob/master/PowerBI_tutorial_articles/Jira_with_PowerBI/resource/code3.txt) and rename it to `GenerateByPage` .
+
+8.  The result queries so far should be:
+
+    1.  `FetchPage`
+
+    2.  `FetchPages`
+
+    3.  `GenerateByPage`
+
+9.  The final step before the data can be used in PowerBI is to invoke the 'FetchPage' query. Input 50 in pageSize window and click Invoke button.\
+    ![](image/Picture12.png)
+
+10. If this error pops up, please click `Edit Credential`.\
+    ![](image/Picture13.png)\
+    And then use this setting to connect.\
+    ![](image/Picture14.png)
+
+11. After invoking the query, query result should pop up. Based on your need, you can expand columns and do your own data transformation.
+    ![](image/Picture15.png)\
+    ![](image/Picture16.png)
+
+# 5. Publish and Set Schedule Refreshment
+
+After you finish your dashboard and publish it, you may encounter this refreshment problem.
+
+![](image/Picture17.png)
+
+![](image/Picture18.png)
+
+To solve it, click on the three dots and select Settings.
+
+![](image/Picture19.png)
+
+Find the Data source credentials option and
+click Edit credentials.
+
+![](image/Picture20.png)
+
+A window will pop up. Fill in the windows
+like below and click Sign in.
+
+![](image/Picture21.png)
+
+Find the Refresh option, which is located under the Data Source Credentials option we just used. Turn on the Refresh option and configure it based on your needs.
+
+![](image/Picture22.png)
+
+After applying the settings, try refreshing your report again. It should work fine now.
+
+![](image/Picture23.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
