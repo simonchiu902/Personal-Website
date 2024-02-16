@@ -22,6 +22,10 @@ website:
         menu:
           - text: "How to import data from Jira"
             href: "PowerBI_tutorial_articles/Jira_with_PowerBI/Jira_with_PowerBI.html"
+      - text: "Useful Application"
+        menu:
+          - text: "自動化宋詞練字本"
+            href: "Useful Application/Automated Writing Template/Web_crawling_poems_from_Wiki.html"
     right:
       - icon: github
         href: https://github.com/simonchiu902/Personal-Website
