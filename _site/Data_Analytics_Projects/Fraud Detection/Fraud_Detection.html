@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Simon Chiu">
-<meta name="dcterms.date" content="2024-01-22">
+<meta name="dcterms.date" content="2024-03-15">
 
 <title>Simon Chiu - Fraud Detection</title>
 <style>
@@ -289,7 +289,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 22, 2024</p>
+      <p class="date">March 15, 2024</p>
     </div>
   </div>
     
@@ -312,13 +312,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <img src="image/roc_curve.png" width="300" height="300">
 </td>
 <td>
-<img src="image/tpr_tnr.png" width="400" height="300">
+<img src="image/tpr_fpr.png" width="400" height="300">
 </td>
 </tr>
 
 </tbody></table>
-<p>ROC curve uses True Positive Rate (TPR) and True Negative Rate (TNR) as y-axis and x-axis.</p>
-<p>TPR indicates the model’s ability to distinguish postive data; TNR indicates the model’s ability to distinguish negative data. Thus, ROC curve shows the overall ability to distinguish postive and negative classes.</p>
+<p>ROC curve uses True Positive Rate (TPR) and False Positive Rate (FPR) as y-axis and x-axis.</p>
+<p>TPR indicates the model’s ability to distinguish postive data; FPR indicates the model’s ability to distinguish negative data. Thus, ROC curve shows the overall ability to distinguish postive and negative classes.</p>
 <p>However, in imbalance dataset with small amount of TP, TNR is not what we care about.</p>
 </section>
 <section id="precision-recall-curve" class="level2">
